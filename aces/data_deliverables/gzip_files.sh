@@ -59,17 +59,17 @@ done
 echo ""
 echo "Group level complete. Processed: $count | Skipped (existing): $skipped"
 
-# --- Gzip .tt1. FITS files in member directories in-place ---
+# --- Gzip .tt0. and .tt1. FITS files in member directories in-place ---
 # Original unzipped files are first moved to a backup directory.
 
-BACKUP_DIR="${BASE}/tt1_images_unzipped" # Not sure if we want to backup? Can change if not needed.
+BACKUP_DIR="${BASE}/tt_images_unzipped"
 
 if ! $DRY_RUN; then
     mkdir -p "$BACKUP_DIR"
 fi
 
-tt1_count=0
-tt1_skipped=0
+tt_count=0
+tt_skipped=0
 
 for memberdir in "$BASE"/member.*/; do
     [[ -d "$memberdir" ]] || continue
@@ -79,15 +79,15 @@ for memberdir in "$BASE"/member.*/; do
 
         basename=$(basename "$fitsfile")
 
-        # Only process files containing '.tt1.'
-        [[ "$basename" == *".tt1."* ]] || continue
+        # Only process files containing '.tt0.' or '.tt1.'
+        [[ "$basename" == *".tt0."* || "$basename" == *".tt1."* ]] || continue
 
         gzfile="${fitsfile}.gz"
 
         # Skip if already gzipped in-place
         if [[ -f "$gzfile" ]]; then
             echo "SKIP (already gzipped): $gzfile"
-            tt1_skipped=$((tt1_skipped + 1))
+            tt_skipped=$((tt_skipped + 1))
             continue
         fi
 
@@ -100,9 +100,9 @@ for memberdir in "$BASE"/member.*/; do
             echo "GZIP:   $fitsfile -> $gzfile"
             gzip "$fitsfile"
         fi
-        tt1_count=$((tt1_count + 1))
+        tt_count=$((tt_count + 1))
     done
 done
 
 echo ""
-echo "Member level complete. Processed: $tt1_count | Skipped (existing): $tt1_skipped"
+echo "Member level complete. Processed: $tt_count | Skipped (existing): $tt_skipped"
